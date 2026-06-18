@@ -6,7 +6,7 @@
 int main(int argc, char *argv[]) {
 	chess::gui gui = chess::gui();
 
-	gui.register_listen();
+	if (!gui.register_listen()) return EXIT_FAILURE;
 	gui.init();
 	gui.run();
 

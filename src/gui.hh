@@ -30,7 +30,7 @@ class gui {
 	int w = 600;
 	int h = 600;
 
-	void register_listen() {
+	bool register_listen() {
 		client = socket(AF_INET, SOCK_STREAM, 0);
 		sockaddr_in addr;
 
@@ -42,9 +42,12 @@ class gui {
 
 		if (res < 0) {
 			printf("err\n");
+			return false;
 		}
 
 		fcntl(client, F_SETFL, O_NONBLOCK);
+
+		return true;
 
 		// printf("continue?");
 		// char c;
@@ -66,9 +69,12 @@ class gui {
 
 			if (no_msg()) {
 				// the error is only signifying that there is no packets to poll for
+			} else {
+				printf("err\n");
 			}
 		} else {
 			// a response consissting of res bytes is received
+			printf("received board\n");
 			binary_to_board(board, buf);
 		}
 	}
@@ -82,19 +88,19 @@ class gui {
 	void init() {
 		SDL_CreateWindowAndRenderer("Chess GUI", w, h, 0, &window, &renderer);
 
-		load_texture(black_textures, "src/assets/image/pawn_black.png", PIECE_PAWN);
-		load_texture(black_textures, "src/assets/image/rook_black.png", PIECE_ROOK);
-		load_texture(black_textures, "src/assets/image/knight_black.png", PIECE_KNIGHT);
-		load_texture(black_textures, "src/assets/image/bishop_black.png", PIECE_BISHOP);
-		load_texture(black_textures, "src/assets/image/queen_black.png", PIECE_QUEEN);
-		load_texture(black_textures, "src/assets/image/king_black.png", PIECE_KING);
+		load_texture(black_textures, "assets/image/pawn_black.png", PIECE_PAWN);
+		load_texture(black_textures, "assets/image/rook_black.png", PIECE_ROOK);
+		load_texture(black_textures, "assets/image/knight_black.png", PIECE_KNIGHT);
+		load_texture(black_textures, "assets/image/bishop_black.png", PIECE_BISHOP);
+		load_texture(black_textures, "assets/image/queen_black.png", PIECE_QUEEN);
+		load_texture(black_textures, "assets/image/king_black.png", PIECE_KING);
 
-		load_texture(white_textures, "src/assets/image/pawn_white.png", PIECE_PAWN);
-		load_texture(white_textures, "src/assets/image/rook_white.png", PIECE_ROOK);
-		load_texture(white_textures, "src/assets/image/knight_white.png", PIECE_KNIGHT);
-		load_texture(white_textures, "src/assets/image/bishop_white.png", PIECE_BISHOP);
-		load_texture(white_textures, "src/assets/image/queen_white.png", PIECE_QUEEN);
-		load_texture(white_textures, "src/assets/image/king_white.png", PIECE_KING);
+		load_texture(white_textures, "assets/image/pawn_white.png", PIECE_PAWN);
+		load_texture(white_textures, "assets/image/rook_white.png", PIECE_ROOK);
+		load_texture(white_textures, "assets/image/knight_white.png", PIECE_KNIGHT);
+		load_texture(white_textures, "assets/image/bishop_white.png", PIECE_BISHOP);
+		load_texture(white_textures, "assets/image/queen_white.png", PIECE_QUEEN);
+		load_texture(white_textures, "assets/image/king_white.png", PIECE_KING);
 	}
 
 	void run() {
