@@ -29,6 +29,12 @@ class gui {
 
 	int w = 600;
 	int h = 600;
+	float block_size;
+
+	bool start_selected = false;
+	bool end_selected = false;
+	Pos start;
+	Pos end;
 
 	bool register_listen() {
 		client = socket(AF_INET, SOCK_STREAM, 0);
@@ -86,7 +92,9 @@ class gui {
 	}
 
 	void init() {
+		block_size = w / 8;
 		SDL_CreateWindowAndRenderer("Chess GUI", w, h, 0, &window, &renderer);
+		SDL_SetDefaultTextureScaleMode(renderer, SDL_SCALEMODE_NEAREST);
 
 		load_texture(black_textures, "assets/image/pawn_black.png", PIECE_PAWN);
 		load_texture(black_textures, "assets/image/rook_black.png", PIECE_ROOK);
@@ -127,23 +135,82 @@ class gui {
 				default:
 					break;
 				}
+			} else if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+				Pos pos = get_pos(event.button.x, event.button.y);
+				printf("%i, %i\n", pos.x, pos.y);
+				if (!start_selected) {
+					if (board[pos.y][pos.x].color != NONE) {
+						start = pos;
+						start_selected = true;
+						end_selected = false;
+					}
+				} else {
+					if (pos.x == start.x && pos.y == start.y) {
+						start_selected = false;
+						end_selected = false;
+					} else {
+						end_selected = true;
+						end = pos;
+
+						send_move(Move(start, end));
+					}
+				}
 			}
 		}
+	}
+
+	void send_move(Move move) {
+		char buf[20];
+		move.to_string(buf);
+
+		start_selected = false;
+		end_selected = false;
+		send(client, buf, 20, 0);
+	}
+
+	Pos get_pos(int x, int y) {
+		int sx = x / block_size;
+		int sy = 7 - (int)(y / block_size);
+
+		return Pos(sx, sy);
 	}
 
 	void render() {
 		SDL_RenderClear(renderer);
 
-		float block_size = w / 8;
-
+		// draw board
 		for (int y = 0; y < 8; y++) {
 			for (int x = 0; x < 8; x++) {
-
 				if ((x + y) % 2 == 1) SDL_SetRenderDrawColor(renderer, 255, 230, 210, 255);
 				else SDL_SetRenderDrawColor(renderer, 40, 20, 10, 255);
 
 				SDL_FRect rect = {x * block_size, (7 - y) * block_size, block_size, block_size};
 				SDL_RenderFillRect(renderer, &rect);
+			}
+		}
+
+		// draw selections
+		if (start_selected) {
+			int x = start.x;
+			int y = start.y;
+
+			SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+			SDL_FRect rect = {x * block_size, (7 - y) * block_size, block_size, block_size};
+			SDL_RenderFillRect(renderer, &rect);
+		}
+		if (end_selected) {
+			int x = end.x;
+			int y = end.y;
+
+			SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+			SDL_FRect rect = {x * block_size, (7 - y) * block_size, block_size, block_size};
+			SDL_RenderFillRect(renderer, &rect);
+		}
+
+		// draw pieces
+		for (int y = 0; y < 8; y++) {
+			for (int x = 0; x < 8; x++) {
+				SDL_FRect rect = {x * block_size, (7 - y) * block_size, block_size, block_size};
 
 				rect.x += (rect.w - rect.h / 2) / 2;
 				rect.w = rect.h / 2;
