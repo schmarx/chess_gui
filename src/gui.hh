@@ -22,7 +22,7 @@ class gui {
 	int client;
 	bool running = true;
 
-	Piece board[8][8];
+	Board board;
 
 	SDL_Texture *white_textures[6];
 	SDL_Texture *black_textures[6];
@@ -69,17 +69,20 @@ class gui {
 		int res = recv(client, buf, TCP_BUF_LEN, 0);
 
 		if (res == 0) {
-			// no more active connections
+			// inactive connection
+			printf("connection lost\n");
+			running = false;
+
 		} else if (res < 0) {
 			// error occured
 
 			if (no_msg()) {
-				// the error is only signifying that there is no packets to poll for
+				// the error is only signifying that there are no packets to poll for
 			} else {
 				printf("err\n");
 			}
 		} else {
-			// a response consissting of res bytes is received
+			// a response consisting of res bytes is received
 			printf("received board\n");
 			binary_to_board(board, buf);
 		}
@@ -117,6 +120,14 @@ class gui {
 			events();
 			render();
 		}
+
+		close_gui();
+	}
+
+	void close_gui() {
+		printf("shutting down\n");
+		SDL_Quit();
+		running = false;
 	}
 
 	void events() {
