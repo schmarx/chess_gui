@@ -23,6 +23,7 @@ class gui {
 	bool running = true;
 
 	Board board;
+	COLOR me;
 
 	SDL_Texture *white_textures[6];
 	SDL_Texture *black_textures[6];
@@ -44,12 +45,18 @@ class gui {
 		addr.sin_addr.s_addr = INADDR_ANY;
 		addr.sin_family = AF_INET;
 
-		int res = connect(client, (sockaddr *)&addr, sizeof(addr));
+		int conn = connect(client, (sockaddr *)&addr, sizeof(addr));
 
-		if (res < 0) {
+		if (conn < 0) {
 			printf("err\n");
 			return false;
 		}
+
+		int buf[TCP_BUF_LEN];
+		int res = recv(client, buf, TCP_BUF_LEN, 0);
+		me = (COLOR)buf[0];
+
+		printf("playing as %s\n", color_codes[me]);
 
 		fcntl(client, F_SETFL, O_NONBLOCK);
 
