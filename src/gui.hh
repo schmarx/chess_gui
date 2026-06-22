@@ -37,6 +37,8 @@ class gui {
 	Pos start;
 	Pos end;
 
+	bool flipped = false;
+
 	bool register_listen() {
 		client = socket(AF_INET, SOCK_STREAM, 0);
 		sockaddr_in addr;
@@ -145,6 +147,9 @@ class gui {
 				break;
 			} else if (event.type == SDL_EVENT_KEY_DOWN) {
 				switch (event.key.key) {
+				case SDLK_F:
+					flipped = !flipped;
+					break;
 				case SDLK_Q:
 				case SDLK_ESCAPE:
 					running = false;
@@ -190,7 +195,21 @@ class gui {
 		int sx = x / block_size;
 		int sy = 7 - (int)(y / block_size);
 
+		if (flipped) {
+			sx = 7 - (int)(x / block_size);
+			sy = y / block_size;
+		}
+
 		return Pos(sx, sy);
+	}
+
+	SDL_FRect get_square_rect(int x, int y) {
+		SDL_FRect rect = {x * block_size, (7 - y) * block_size, block_size, block_size};
+		if (flipped) {
+			rect.x = (7 - x) * block_size;
+			rect.y = y * block_size;
+		}
+		return rect;
 	}
 
 	void render() {
@@ -202,7 +221,7 @@ class gui {
 				if ((x + y) % 2 == 1) SDL_SetRenderDrawColor(renderer, 255, 230, 210, 255);
 				else SDL_SetRenderDrawColor(renderer, 40, 20, 10, 255);
 
-				SDL_FRect rect = {x * block_size, (7 - y) * block_size, block_size, block_size};
+				SDL_FRect rect = get_square_rect(x, y);
 				SDL_RenderFillRect(renderer, &rect);
 			}
 		}
@@ -213,7 +232,7 @@ class gui {
 			int y = start.y;
 
 			SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
-			SDL_FRect rect = {x * block_size, (7 - y) * block_size, block_size, block_size};
+			SDL_FRect rect = get_square_rect(x, y);
 			SDL_RenderFillRect(renderer, &rect);
 		}
 		if (end_selected) {
@@ -221,14 +240,14 @@ class gui {
 			int y = end.y;
 
 			SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-			SDL_FRect rect = {x * block_size, (7 - y) * block_size, block_size, block_size};
+			SDL_FRect rect = get_square_rect(x, y);
 			SDL_RenderFillRect(renderer, &rect);
 		}
 
 		// draw pieces
 		for (int y = 0; y < 8; y++) {
 			for (int x = 0; x < 8; x++) {
-				SDL_FRect rect = {x * block_size, (7 - y) * block_size, block_size, block_size};
+				SDL_FRect rect = get_square_rect(x, y);
 
 				rect.x += (rect.w - rect.h / 2) / 2;
 				rect.w = rect.h / 2;
