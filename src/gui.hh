@@ -218,8 +218,8 @@ class gui {
 		// draw board
 		for (int y = 0; y < 8; y++) {
 			for (int x = 0; x < 8; x++) {
-				if ((x + y) % 2 == 1) SDL_SetRenderDrawColor(renderer, 255, 230, 210, 255);
-				else SDL_SetRenderDrawColor(renderer, 40, 20, 10, 255);
+				if ((x + y) % 2 == 1) SDL_SetRenderDrawColor(renderer, 245, 220, 190, 255);
+				else SDL_SetRenderDrawColor(renderer, 80, 40, 20, 255);
 
 				SDL_FRect rect = get_square_rect(x, y);
 				SDL_RenderFillRect(renderer, &rect);
