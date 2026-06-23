@@ -118,10 +118,57 @@ class gui {
 			cached_score = board.get_score();
 		}
 	}
+
+	bool has_val(SDL_Surface *surface, int x, int y) {
+		if (x < 0 || x >= surface->w || y < 0 || y >= surface->h) return false;
+
+		SDL_Color col;
+		SDL_ReadSurfacePixel(surface, x, y, &col.r, &col.g, &col.b, &col.a);
+
+		return col.a > 0;
+	}
+
+	SDL_Surface *add_border(SDL_Surface *surface) {
+		SDL_Color color;
+		SDL_Color piece_color;
+
+		SDL_ReadSurfacePixel(surface, surface->w / 2, surface->h / 2, &piece_color.r, &piece_color.g, &piece_color.b, &piece_color.a);
+
+		if (piece_color.r > 128) {
+			color = {0, 0, 0, 255}; // black border
+		} else {
+			color = {255, 255, 255, 255}; // white border
+		}
+
+		SDL_Surface *new_surface = SDL_CreateSurface(surface->w, surface->h, SDL_PIXELFORMAT_RGBA8888);
+
+		for (int y = 0; y < surface->h; y++) {
+			for (int x = 0; x < surface->w; x++) {
+
+				if (
+					has_val(surface, x + 1, y) ||
+					has_val(surface, x - 1, y) ||
+					has_val(surface, x, y + 1) ||
+					has_val(surface, x, y - 1)) {
+					// if a neighbouring pixel has value, then the new surface will be shaded there
+					SDL_WriteSurfacePixel(new_surface, x, y, color.r, color.g, color.b, color.a);
+				}
+
+				SDL_Color col;
+				SDL_ReadSurfacePixel(surface, x, y, &col.r, &col.g, &col.b, &col.a);
+				if (has_val(surface, x, y)) SDL_WriteSurfacePixel(new_surface, x, y, col.r, col.g, col.b, col.a); // overwrite with the piece color if it has color
+			}
+		}
+
+		SDL_DestroySurface(surface);
+		return new_surface;
 	}
 
 	void load_texture(SDL_Texture *textures[6], const char *filename, int index) {
 		SDL_Surface *surface = IMG_Load(filename);
+
+		surface = add_border(surface);
+
 		textures[index - 1] = SDL_CreateTextureFromSurface(renderer, surface);
 		SDL_DestroySurface(surface);
 	}
