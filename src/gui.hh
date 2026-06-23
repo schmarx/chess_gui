@@ -43,6 +43,8 @@ class gui {
 	SDL_Texture *black_textures[6];
 	Texture *LETTERS;
 
+	std::vector<Piece> captured;
+
 	int w = 600;
 	int h = 600;
 	int margin = 100;
@@ -108,6 +110,7 @@ class gui {
 			// a response consisting of res bytes is received
 			printf("received board (%i bits)\n", res);
 			packet_to_board(board, *((packet *)buf));
+			if (board.captured) captured.push_back(Piece(board.captured, board.player_turn));
 			cached_score = board.get_score();
 		}
 	}
@@ -396,6 +399,30 @@ class gui {
 	void draw_ui() {
 		render_text(0, 0, ALIGN_LEFT, 0, LETTERS, "%s's turn", color_codes[board.player_turn]);
 		render_text(0, 0, ALIGN_LEFT, -1, LETTERS, "score: %i", cached_score);
+
+		int width = 20;
+		int height = width * 2;
+
+		int w_total = 0;
+		int b_total = 0;
+		for (size_t i = 0; i < captured.size(); i++) {
+			int x;
+			int y = 100;
+			SDL_Texture *texture;
+			if (captured[i].color == WHITE) {
+				x = win_w - width;
+				y += w_total * height;
+				w_total++;
+				texture = white_textures[captured[i].type - 1];
+			} else {
+				x = 0;
+				y += b_total * height;
+				b_total++;
+				texture = black_textures[captured[i].type - 1];
+			}
+			SDL_FRect rect = {x, y, width, height};
+			SDL_RenderTexture(renderer, texture, NULL, &rect);
+		}
 	}
 
 	void render() {
