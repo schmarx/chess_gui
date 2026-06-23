@@ -38,7 +38,6 @@ class gui {
 	bool running = true;
 
 	Board board;
-	COLOR me;
 
 	SDL_Texture *white_textures[6];
 	SDL_Texture *black_textures[6];
@@ -74,12 +73,6 @@ class gui {
 			printf("err\n");
 			return false;
 		}
-
-		int buf[TCP_BUF_LEN];
-		int res = recv(client, buf, TCP_BUF_LEN, 0);
-		me = (COLOR)buf[0];
-
-		printf("playing as %s\n", color_codes[me]);
 
 		fcntl(client, F_SETFL, O_NONBLOCK);
 
@@ -232,6 +225,7 @@ class gui {
 
 		SDL_CreateWindowAndRenderer("Chess GUI", win_w, win_h, 0, &window, &renderer);
 		SDL_SetDefaultTextureScaleMode(renderer, SDL_SCALEMODE_NEAREST);
+		SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
 		load_texture(black_textures, "assets/image/pawn_black.png", PIECE_PAWN);
 		load_texture(black_textures, "assets/image/rook_black.png", PIECE_ROOK);
@@ -376,7 +370,13 @@ class gui {
 			SDL_RenderFillRect(renderer, &rect);
 		}
 
-		SDL_SetRenderDrawColor(renderer, 0, 255, 255, 200);
+		SDL_FRect rect = get_square_rect(board.last_move.start.x, board.last_move.start.y);
+		SDL_SetRenderDrawColor(renderer, 16, 64, 64, 255);
+		SDL_RenderFillRect(renderer, &rect);
+
+		rect = get_square_rect(board.last_move.end.x, board.last_move.end.y);
+		SDL_SetRenderDrawColor(renderer, 0, 128, 128, 255);
+		SDL_RenderFillRect(renderer, &rect);
 	}
 
 	void draw_pieces() {
