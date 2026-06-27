@@ -19,8 +19,8 @@ namespace chess {
 
 typedef struct {
 	SDL_Texture *tx;
-	int w;
-	int h;
+	float w;
+	float h;
 } Texture;
 
 enum ALIGNMENT {
@@ -169,7 +169,7 @@ class gui {
 		SDL_DestroySurface(surface);
 	}
 
-	void render_text(int pos_x, int pos_y, int align, int offset_y, Texture font[], const char *text, ...) {
+	void render_text(float pos_x, float pos_y, int align, int offset_y, Texture font[], const char *text, ...) {
 
 		char render_string[150];
 		va_list args;
@@ -400,14 +400,14 @@ class gui {
 		render_text(0, 0, ALIGN_LEFT, 0, LETTERS, "%s's turn", color_codes[board.player_turn]);
 		render_text(0, 0, ALIGN_LEFT, -1, LETTERS, "score: %i", cached_score);
 
-		int width = 20;
-		int height = width * 2;
+		float width = 20;
+		float height = width * 2;
 
-		int w_total = 0;
-		int b_total = 0;
+		float w_total = 0;
+		float b_total = 0;
 		for (size_t i = 0; i < captured.size(); i++) {
-			int x;
-			int y = 100;
+			float x;
+			float y = 100;
 			SDL_Texture *texture;
 			if (captured[i].color == WHITE) {
 				x = win_w - width;
