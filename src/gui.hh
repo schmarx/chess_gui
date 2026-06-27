@@ -61,6 +61,8 @@ class gui {
 
 	int cached_score = 0;
 
+	char message[256] = "";
+
 	bool register_listen() {
 		client = socket(AF_INET, SOCK_STREAM, 0);
 		sockaddr_in addr;
@@ -201,7 +203,7 @@ class gui {
 		LETTERS = (Texture *)malloc(sizeof(Texture) * CHAR_COUNT);
 
 		TTF_Init();
-		TTF_Font *font_normal = TTF_OpenFont("assets/slkscr.ttf", 32);
+		TTF_Font *font_normal = TTF_OpenFont("assets/slkscr.ttf", 24);
 
 		SDL_Color color = {255, 255, 255, 255};
 		for (int i = 1; i < CHAR_COUNT; i++) {
@@ -274,6 +276,15 @@ class gui {
 				case SDLK_F:
 					flipped = !flipped;
 					break;
+				case SDLK_S: {
+					char filename[128] = "";
+					board.logger->datetime_string(filename);
+					strcat(filename, ".txt");
+					board.save_board(filename);
+
+					message[0] = '\0';
+					sprintf(message, "saved board to \"%s\"", filename);
+				} break;
 				case SDLK_Q:
 				case SDLK_ESCAPE:
 					running = false;
@@ -397,8 +408,9 @@ class gui {
 	}
 
 	void draw_ui() {
-		render_text(0, 0, ALIGN_LEFT, 0, LETTERS, "%s's turn", color_codes[board.player_turn]);
-		render_text(0, 0, ALIGN_LEFT, -1, LETTERS, "score: %i", cached_score);
+		render_text(0, 0, ALIGN_LEFT, 0, LETTERS, "%s", message);
+		render_text(0, 0, ALIGN_LEFT, -1, LETTERS, "%s's turn", color_codes[board.player_turn]);
+		render_text(0, 0, ALIGN_LEFT, -2, LETTERS, "score: %i", cached_score);
 
 		float width = 20;
 		float height = width * 2;
